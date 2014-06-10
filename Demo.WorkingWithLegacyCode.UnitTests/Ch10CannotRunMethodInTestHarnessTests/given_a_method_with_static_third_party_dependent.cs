@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Eventing.Reader;
 using NUnit.Framework;
 
 namespace Demo.WorkingWithLegacyCode.UnitTests.Ch10CannotRunMethodInTestHarnessTests
@@ -9,21 +10,64 @@ namespace Demo.WorkingWithLegacyCode.UnitTests.Ch10CannotRunMethodInTestHarnessT
         [Test]
         public void when_testing_can_use_skin_and_wrapper_method()
         {
-            new ClassWithMethodWithStaticDependent().MethodWithStaticDependentWithMethodInjection(new FakeDateTimeProvider(new DateTime(2014, 1, 1)));   
+            new ClassWithMethodWithStaticDependentUsingMethodInjection().MethodWithStaticDependent(new FakeDateTimeProvider(new DateTime(2014, 1, 1)));
+            
+            new ClassWithMethodWithStaticDependentUsingPropertyInjection
+            {
+                GetCurrentDate = () => new DateTime(2014, 1, 1)
+            }.MethodWithStaticDependent();
+
+            new ClassWithMethodWithStaticDependentUsingConstructorInjection(new FakeDateTimeProvider(new DateTime(2014, 1, 1))).MethodWithStaticDependent();
         }
     }
 
-    public class ClassWithMethodWithStaticDependent
+    public class ClassWithMethodWithStaticDependentUsingMethodInjection
     {
         public void MethodWithStaticDependent()
         {
-            if (DateTime.Now == new DateTime(2014, 1, 1))
+            MethodWithStaticDependent(new DateTimeWrapper());
+        }
+
+        public void MethodWithStaticDependent(IDateTimeProvider provider)
+        {
+            if (provider.GetCurrentDateTime() == new DateTime(2014, 1, 1))
+                Console.WriteLine("We have a matching date.");
+        }
+    }
+
+    public class ClassWithMethodWithStaticDependentUsingPropertyInjection
+    {
+        public ClassWithMethodWithStaticDependentUsingPropertyInjection()
+        {
+            GetCurrentDate = GetCurrentDateLocalDefault;
+        }
+
+        public void MethodWithStaticDependent()
+        {
+            if (GetCurrentDate() == new DateTime(2014, 1, 1))
                 Console.WriteLine("We have a matching date.");
         }
 
-        public void MethodWithStaticDependentWithMethodInjection(IDateTimeProvider provider)
+        public Func<DateTime> GetCurrentDate { get; set; }
+
+        private DateTime GetCurrentDateLocalDefault()
         {
-            if (provider.GetCurrentDateTime() == new DateTime(2014, 1, 1))
+            return DateTime.Now;
+        }
+    }
+
+    public class ClassWithMethodWithStaticDependentUsingConstructorInjection
+    {
+        private readonly IDateTimeProvider _provider;
+
+        public ClassWithMethodWithStaticDependentUsingConstructorInjection(IDateTimeProvider provider)
+        {
+            _provider = provider;
+        }
+
+        public void MethodWithStaticDependent()
+        {
+            if (_provider.GetCurrentDateTime() == new DateTime(2014, 1, 1))
                 Console.WriteLine("We have a matching date.");
         }
     }
