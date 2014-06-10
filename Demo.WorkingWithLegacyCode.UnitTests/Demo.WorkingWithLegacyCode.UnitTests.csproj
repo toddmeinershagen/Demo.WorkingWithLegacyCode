@@ -44,7 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Ch10CannotRunMethodInTestHarnessTests.cs" />
+    <Compile Include="Ch10CannotRunMethodInTestHarnessTests\given_a_hidden_method.cs" />
+    <Compile Include="Ch10CannotRunMethodInTestHarnessTests\given_a_method_with_static_third_party_dependent.cs" />
+    <Compile Include="Ch4SeamModel\given_a_long_method.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
